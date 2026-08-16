@@ -4,11 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>bena - Private Spaces</title>
-  <!-- Tailwind CSS عبر CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase JS Client عبر CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- خط Serif -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
@@ -47,8 +44,8 @@
           <input type="email" id="email" required placeholder="name@example.com" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm">
         </div>
         <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1">Password</label>
-          <input type="password" id="password" required placeholder="••••••••" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm">
+          <label class="block text-xs font-medium text-zinc-400 mb-1">Password (Min 6 chars)</label>
+          <input type="password" id="password" required minlength="6" placeholder="••••••••" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm">
         </div>
         <button type="submit" id="submit-btn" class="w-full py-3 px-4 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold rounded-xl text-sm transition">
           Sign In
@@ -56,32 +53,32 @@
       </form>
 
       <div class="mt-6 text-center">
-        <button id="toggle-auth" class="text-xs text-zinc-400 hover:text-white">
+        <button id="toggle-auth" type="button" class="text-xs text-zinc-400 hover:text-white">
           Don't have an account? Sign Up
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MAIN APP CONTAINER (مخفي حتى تسجيل الدخول) -->
+  <!-- MAIN APP CONTAINER -->
   <div id="app-container" class="hidden p-8 text-center">
     <h1 class="font-serif text-3xl font-bold mb-4">Welcome to bena!</h1>
     <p id="user-info" class="text-zinc-400 mb-6"></p>
-    <button id="logout-btn" class="px-4 py-2 bg-red-950 text-red-200 border border-red-800 rounded-xl hover:bg-red-900 text-sm">
+    <button id="logout-btn" type="button" class="px-4 py-2 bg-red-950 text-red-200 border border-red-800 rounded-xl hover:bg-red-900 text-sm">
       Sign Out
     </button>
   </div>
 
   <script>
-    // 1. ضع رابط ومفتاح مشروعك من Supabase هنا
-    const SUPABASE_URL = 'https://squffpbesprtmzyztzox.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxdWZmcGJlc3BydG16eXp0em94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTY4MjUsImV4cCI6MjEwMjQ3MjgyNX0.It6g0pCGoGF3iOGexN2U48LFmgFYSjlbCazLdmmayf8';
+    // ⚠️ ضع رابط ومفتاح مشروعك هنا
+    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
     
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // إنشاء الاتصال بشكل آمن
+    const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
     let isSignUp = false;
 
-    // Elements
     const authContainer = document.getElementById('auth-container');
     const appContainer = document.getElementById('app-container');
     const authForm = document.getElementById('auth-form');
@@ -94,11 +91,12 @@
     const userInfo = document.getElementById('user-info');
     const logoutBtn = document.getElementById('logout-btn');
 
-    // التبديل بين تسجيل الدخول وإنشاء حساب
+    // التبديل بين Sign In و Sign Up
     toggleBtn.addEventListener('click', () => {
       isSignUp = !isSignUp;
       errorMsg.classList.add('hidden');
       infoMsg.classList.add('hidden');
+      
       if (isSignUp) {
         authSubtitle.textContent = 'Create a private space with your friends';
         submitBtn.textContent = 'Create Account';
@@ -110,20 +108,28 @@
       }
     });
 
-    // تنفيذ عملية المصادقة
+    // عند الضغط على الزر الرئيسي
     authForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorMsg.classList.add('hidden');
       infoMsg.classList.add('hidden');
+
+      if (!supabaseClient) {
+        showError('Supabase is not configured properly.');
+        return;
+      }
+
       submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
 
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
       try {
         if (isSignUp) {
-          const { data, error } = await supabase.auth.signUp({ email, password });
+          const { data, error } = await supabaseClient.auth.signUp({ email, password });
           if (error) throw error;
+
           if (data.user && data.user.identities && data.user.identities.length === 0) {
             showError('This email is already registered. Try logging in instead.');
           } else {
@@ -131,7 +137,7 @@
             infoMsg.classList.remove('hidden');
           }
         } else {
-          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
           if (error) {
             showError('Incorrect email or password. Please try again.');
           } else {
@@ -139,9 +145,11 @@
           }
         }
       } catch (err) {
-        showError(err.message);
+        console.error('Auth Error:', err);
+        showError(err.message || 'An error occurred during authentication.');
       } finally {
         submitBtn.disabled = false;
+        submitBtn.textContent = isSignUp ? 'Create Account' : 'Sign In';
       }
     });
 
@@ -150,9 +158,9 @@
       errorMsg.classList.remove('hidden');
     }
 
-    // التحقق من حالة تسجيل الدخول
     async function checkSession() {
-      const { data: { session } } = await supabase.auth.getSession();
+      if (!supabaseClient) return;
+      const { data: { session } } = await supabaseClient.auth.getSession();
       if (session) {
         authContainer.classList.add('hidden');
         appContainer.classList.remove('hidden');
@@ -164,11 +172,10 @@
     }
 
     logoutBtn.addEventListener('click', async () => {
-      await supabase.auth.signOut();
+      if (supabaseClient) await supabaseClient.auth.signOut();
       checkSession();
     });
 
-    // تشغيل الفحص عند فتح الصفحة
     checkSession();
   </script>
 </body>
