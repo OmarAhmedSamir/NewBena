@@ -1,1 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bena - Private Spaces</title>
+  <!-- Tailwind CSS عبر CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS Client عبر CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- خط Serif -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-zinc-100 min-h-screen font-sans">
 
+  <!-- AUTH CONTAINER -->
+  <div id="auth-container" class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-zinc-900/80 border border-zinc-800 rounded-2xl p-8 backdrop-blur-md shadow-2xl">
+      <div class="text-center mb-8">
+        <h1 class="font-serif text-4xl font-bold tracking-wide bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent mb-2">
+          bena
+        </h1>
+        <p id="auth-subtitle" class="text-zinc-400 text-sm">Welcome back to your spaces</p>
+      </div>
+
+      <!-- Alert Messages -->
+      <div id="error-msg" class="hidden mb-4 p-3 text-sm bg-red-950/50 border border-red-800 text-red-200 rounded-lg"></div>
+      <div id="info-msg" class="hidden mb-4 p-4 text-sm bg-emerald-950/50 border border-emerald-800 text-emerald-200 rounded-lg text-center space-y-3">
+        <p id="info-text"></p>
+        <a href="https://mail.google.com" target="_blank" class="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium text-xs">Open Gmail</a>
+      </div>
+
+      <form id="auth-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-zinc-400 mb-1">Email</label>
+          <input type="email" id="email" required placeholder="name@example.com" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-zinc-400 mb-1">Password</label>
+          <input type="password" id="password" required placeholder="••••••••" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm">
+        </div>
+        <button type="submit" id="submit-btn" class="w-full py-3 px-4 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold rounded-xl text-sm transition">
+          Sign In
+        </button>
+      </form>
+
+      <div class="mt-6 text-center">
+        <button id="toggle-auth" class="text-xs text-zinc-400 hover:text-white">
+          Don't have an account? Sign Up
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP CONTAINER (مخفي حتى تسجيل الدخول) -->
+  <div id="app-container" class="hidden p-8 text-center">
+    <h1 class="font-serif text-3xl font-bold mb-4">Welcome to bena!</h1>
+    <p id="user-info" class="text-zinc-400 mb-6"></p>
+    <button id="logout-btn" class="px-4 py-2 bg-red-950 text-red-200 border border-red-800 rounded-xl hover:bg-red-900 text-sm">
+      Sign Out
+    </button>
+  </div>
+
+  <script>
+    // 1. ضع رابط ومفتاح مشروعك من Supabase هنا
+    const SUPABASE_URL = 'ضع_رابط_مشروعك_هنا';
+    const SUPABASE_ANON_KEY = 'ضع_المفتاح_هنا';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let isSignUp = false;
+
+    // Elements
+    const authContainer = document.getElementById('auth-container');
+    const appContainer = document.getElementById('app-container');
+    const authForm = document.getElementById('auth-form');
+    const toggleBtn = document.getElementById('toggle-auth');
+    const submitBtn = document.getElementById('submit-btn');
+    const authSubtitle = document.getElementById('auth-subtitle');
+    const errorMsg = document.getElementById('error-msg');
+    const infoMsg = document.getElementById('info-msg');
+    const infoText = document.getElementById('info-text');
+    const userInfo = document.getElementById('user-info');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    // التبديل بين تسجيل الدخول وإنشاء حساب
+    toggleBtn.addEventListener('click', () => {
+      isSignUp = !isSignUp;
+      errorMsg.classList.add('hidden');
+      infoMsg.classList.add('hidden');
+      if (isSignUp) {
+        authSubtitle.textContent = 'Create a private space with your friends';
+        submitBtn.textContent = 'Create Account';
+        toggleBtn.textContent = 'Already have an account? Sign In';
+      } else {
+        authSubtitle.textContent = 'Welcome back to your spaces';
+        submitBtn.textContent = 'Sign In';
+        toggleBtn.textContent = "Don't have an account? Sign Up";
+      }
+    });
+
+    // تنفيذ عملية المصادقة
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.add('hidden');
+      infoMsg.classList.add('hidden');
+      submitBtn.disabled = true;
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        if (isSignUp) {
+          const { data, error } = await supabase.auth.signUp({ email, password });
+          if (error) throw error;
+          if (data.user && data.user.identities && data.user.identities.length === 0) {
+            showError('This email is already registered. Try logging in instead.');
+          } else {
+            infoText.textContent = 'Confirmation email sent! Please check your inbox.';
+            infoMsg.classList.remove('hidden');
+          }
+        } else {
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) {
+            showError('Incorrect email or password. Please try again.');
+          } else {
+            checkSession();
+          }
+        }
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.remove('hidden');
+    }
+
+    // التحقق من حالة تسجيل الدخول
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        authContainer.classList.add('hidden');
+        appContainer.classList.remove('hidden');
+        userInfo.textContent = 'Logged in as ID: ' + session.user.id;
+      } else {
+        authContainer.classList.remove('hidden');
+        appContainer.classList.add('hidden');
+      }
+    }
+
+    logoutBtn.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      checkSession();
+    });
+
+    // تشغيل الفحص عند فتح الصفحة
+    checkSession();
+  </script>
+</body>
+</html>
