@@ -1,80 +1,157 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>bena - Private Spaces</title>
+  <title>Bena — Private Spaces</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'slide-up': 'slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    body { background-color: #09090b; } /* zinc-950 */
+    body {
+      background-color: #000000;
+      color: #f5f5f7;
+    }
+    .glass-card {
+      background: rgba(22, 22, 23, 0.75);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .apple-input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.3s ease;
+    }
+    .apple-input:focus {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.06);
+    }
   </style>
 </head>
-<body class="text-zinc-100 min-h-screen font-sans overflow-x-hidden">
+<body class="min-h-screen font-sans antialiased relative overflow-x-hidden selection:bg-white/20 selection:text-white">
 
-  <!-- Mouse Glow Animation -->
-  <div id="mouse-glow" class="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300 opacity-60" style="background: radial-gradient(600px circle at 50% 50%, rgba(245, 158, 11, 0.12), transparent 70%);"></div>
+  <!-- Dynamic Ambient Mouse Glow Background -->
+  <div id="mouse-glow" class="pointer-events-none fixed inset-0 z-0 transition-opacity duration-700 opacity-40" style="background: radial-gradient(800px circle at 50% 50%, rgba(120, 119, 198, 0.15), transparent 70%);"></div>
 
-  <!-- Auth Container -->
-  <div id="auth-container" class="relative z-10 min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-zinc-900/80 border border-zinc-800 rounded-3xl p-8 backdrop-blur-md shadow-2xl">
-      <h1 class="font-serif text-4xl font-bold text-center mb-8 bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">bena</h1>
-      <div id="error-msg" class="hidden mb-4 p-3 text-xs bg-red-950/60 border border-red-800 text-red-200 rounded-xl"></div>
+  <!-- ================= AUTH CONTAINER ================= -->
+  <div id="auth-container" class="relative z-10 min-h-screen flex items-center justify-center p-6 animate-fade-in">
+    <div class="w-full max-w-[420px] glass-card rounded-[28px] p-8 md:p-10 shadow-2xl animate-slide-up">
       
+      <!-- Brand Logo -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold tracking-tight text-white mb-2 font-sans">
+          Bena
+        </h1>
+        <p class="text-zinc-400 text-xs tracking-wide">Sign in to access your private spaces</p>
+      </div>
+
+      <!-- Error Message Box -->
+      <div id="error-msg" class="hidden mb-6 p-3.5 text-xs bg-red-500/10 border border-red-500/20 text-red-300 rounded-xl backdrop-blur-md animate-fade-in"></div>
+      
+      <!-- Auth Form -->
       <form id="auth-form" class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1">Email</label>
-          <input type="email" id="email" required class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-amber-400 text-white">
+        <div class="space-y-1">
+          <label class="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider ml-1">Email</label>
+          <input type="email" id="email" required placeholder="name@domain.com" class="w-full px-4 py-3.5 apple-input rounded-2xl focus:outline-none text-white text-sm placeholder:text-zinc-600">
         </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1">Password</label>
-          <input type="password" id="password" required class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-amber-400 text-white">
+
+        <div class="space-y-1">
+          <label class="block text-[11px] font-medium text-zinc-400 uppercase tracking-wider ml-1">Password</label>
+          <input type="password" id="password" required placeholder="••••••••" class="w-full px-4 py-3.5 apple-input rounded-2xl focus:outline-none text-white text-sm placeholder:text-zinc-600">
         </div>
-        <button type="submit" id="submit-btn" class="w-full py-3.5 bg-zinc-100 text-zinc-950 font-bold rounded-xl hover:bg-white transition">Sign In</button>
+
+        <button type="submit" id="submit-btn" class="w-full py-3.5 px-4 bg-white hover:bg-zinc-200 text-zinc-950 font-semibold rounded-2xl text-sm transition-all duration-300 transform active:scale-[0.98] shadow-lg mt-2">
+          Sign In
+        </button>
       </form>
     </div>
   </div>
 
-  <!-- Dashboard Container -->
-  <div id="dashboard-container" class="hidden relative z-10 min-h-screen p-8">
-    <header class="max-w-6xl mx-auto flex justify-between items-center mb-10">
-      <h1 class="font-serif text-2xl font-bold text-white">bena</h1>
-      <button id="logout-btn" class="text-xs text-zinc-400 hover:text-red-400">Sign Out</button>
+  <!-- ================= DASHBOARD CONTAINER ================= -->
+  <div id="dashboard-container" class="hidden relative z-10 min-h-screen flex flex-col animate-fade-in">
+    <header class="border-b border-white/10 bg-black/40 backdrop-blur-xl sticky top-0 z-40">
+      <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <h1 class="text-xl font-bold tracking-tight text-white">Bena</h1>
+        <button id="logout-btn" class="text-xs text-zinc-400 hover:text-white transition px-3 py-1.5 rounded-lg hover:bg-white/5 border border-transparent hover:border-white/10">
+          Sign Out
+        </button>
+      </div>
     </header>
-    <main class="max-w-6xl mx-auto">
-      <h2 class="text-2xl font-bold text-white mb-6">Your Spaces</h2>
+
+    <main class="max-w-6xl mx-auto px-6 py-12 flex-1 w-full">
+      <div class="mb-10">
+        <h2 class="text-2xl font-bold text-white tracking-tight mb-1">Your Spaces</h2>
+        <p class="text-zinc-400 text-xs">Manage your secure circles and spaces.</p>
+      </div>
       <div id="spaces-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
     </main>
   </div>
 
   <script>
-    // 1. Mouse Animation
+    // Apple-style interactive ambient mouse follower
     const mouseGlow = document.getElementById('mouse-glow');
     window.addEventListener('mousemove', (e) => {
-      mouseGlow.style.background = `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px, rgba(245, 158, 11, 0.12), transparent 70%)`;
+      const x = e.clientX;
+      const y = e.clientY;
+      mouseGlow.style.background = `radial-gradient(800px circle at ${x}px ${y}px, rgba(120, 119, 198, 0.12), transparent 70%)`;
     });
 
-    // 2. Supabase Setup
-    // هام جداً: ضع هنا مفتاح الـ API Key الصحيح من Supabase (Project Settings > API > anon public)
+    // Supabase Configuration
     const SUPABASE_URL = 'https://squffpbesprtmzyztzox.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_PUBLIC_KEY'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxdWZmcGJlc3BydG16eXp0em94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTY4MjUsImV4cCI6MjEwMjQ3MjgyNX0.It6g0pCGoGF3iOGexN2U48LFmgFYSjlbCazLdmmayf8';
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const authForm = document.getElementById('auth-form');
     const authContainer = document.getElementById('auth-container');
     const dashboardContainer = document.getElementById('dashboard-container');
+    const errorMsg = document.getElementById('error-msg');
+    const submitBtn = document.getElementById('submit-btn');
 
     authForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      errorMsg.classList.add('hidden');
+      submitBtn.textContent = 'Signing in...';
+      submitBtn.disabled = true;
+
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
       if (error) {
-        document.getElementById('error-msg').textContent = error.message;
-        document.getElementById('error-msg').classList.remove('hidden');
+        errorMsg.textContent = error.message;
+        errorMsg.classList.remove('hidden');
+        submitBtn.textContent = 'Sign In';
+        submitBtn.disabled = false;
       } else {
         checkSession();
       }
