@@ -8,615 +8,83 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
   <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            serif: ['Playfair Display', 'serif'],
-          }
-        }
-      }
-    }
+    tailwind.config = { theme: { extend: { fontFamily: { serif: ['Playfair Display', 'serif'] } } } }
   </script>
 </head>
-<body class="bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-zinc-100 min-h-screen font-sans">
+<body class="bg-zinc-950 text-zinc-100 min-h-screen font-sans">
 
-  <!-- ================= 1. AUTH SECTION ================= -->
-  <div id="auth-container" class="min-h-screen flex items-center justify-center p-4">
-    <div id="auth-card" class="w-full max-w-md bg-zinc-900/80 border border-zinc-800 rounded-3xl p-8 backdrop-blur-md shadow-2xl transition-all duration-300">
-      
-      <div class="flex p-1 bg-zinc-950 border border-zinc-800/80 rounded-xl mb-8">
-        <button id="tab-login" type="button" class="flex-1 py-2 text-xs font-semibold rounded-lg transition-all bg-zinc-800 text-white shadow">
-          Sign In
-        </button>
-        <button id="tab-signup" type="button" class="flex-1 py-2 text-xs font-semibold rounded-lg transition-all text-zinc-400 hover:text-white">
-          Create Account
-        </button>
-      </div>
+  <div id="mouse-glow" class="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300 opacity-60" style="background: radial-gradient(600px circle at 50% 50%, rgba(245, 158, 11, 0.12), transparent 70%);"></div>
 
-      <div class="text-center mb-6">
-        <h1 class="font-serif text-4xl font-bold tracking-wide bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent mb-2">
-          bena
-        </h1>
-        <p id="auth-subtitle" class="text-zinc-400 text-xs">Welcome back to your spaces</p>
-      </div>
-
+  <!-- Auth Container -->
+  <div id="auth-container" class="relative z-10 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-zinc-900/80 border border-zinc-800 rounded-3xl p-8 backdrop-blur-md shadow-2xl">
+      <h1 class="font-serif text-4xl font-bold text-center mb-8 bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">bena</h1>
       <div id="error-msg" class="hidden mb-4 p-3 text-xs bg-red-950/60 border border-red-800 text-red-200 rounded-xl"></div>
-      <div id="info-msg" class="hidden mb-4 p-4 text-xs bg-emerald-950/60 border border-emerald-800 text-emerald-200 rounded-xl text-center space-y-3">
-        <p id="info-text"></p>
-        <a href="https://mail.google.com" target="_blank" class="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium text-xs">Open Gmail</a>
-      </div>
-
-      <form id="auth-form" class="space-y-4">
-        <div id="name-field" class="hidden">
-          <label class="block text-xs font-medium text-amber-200/80 mb-1">Full Name</label>
-          <input type="text" id="full-name" placeholder="Omar Samir" class="w-full px-4 py-3 bg-zinc-950/90 border border-amber-500/30 rounded-xl focus:outline-none focus:border-amber-400 text-white text-sm transition">
-        </div>
-
-        <div>
-          <label id="email-label" class="block text-xs font-medium text-zinc-400 mb-1">Email</label>
-          <input type="email" id="email" required placeholder="name@example.com" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm transition">
-        </div>
-
-        <div>
-          <label id="pass-label" class="block text-xs font-medium text-zinc-400 mb-1">Password</label>
-          <input type="password" id="password" required minlength="6" placeholder="••••••••" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm transition">
-        </div>
-
-        <button type="submit" id="submit-btn" class="w-full py-3.5 px-4 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold rounded-xl text-sm transition shadow-lg mt-2">
-          Sign In
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ================= 2. MANDATORY PROFILE SETUP SECTION ================= -->
-  <div id="profile-setup-container" class="hidden min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-zinc-900 border border-amber-500/30 rounded-3xl p-8 backdrop-blur-md shadow-2xl relative overflow-hidden">
-      <div class="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
       
-      <div class="text-center mb-6">
-        <span class="text-xs uppercase tracking-widest font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full inline-block mb-3">Step 2 of 2</span>
-        <h2 class="font-serif text-2xl font-bold text-white mb-1">Complete Your Profile</h2>
-        <p class="text-zinc-400 text-xs">Set up your identity before joining your private spaces.</p>
-      </div>
-
-      <div id="profile-error" class="hidden mb-4 p-3 text-xs bg-red-950/60 border border-red-800 text-red-200 rounded-xl"></div>
-
-      <form id="profile-form" class="space-y-4">
-        <!-- Avatar Preview & File Input -->
-        <div class="flex flex-col items-center gap-2 mb-2">
-          <div id="avatar-preview" class="w-20 h-20 rounded-full bg-zinc-800 border-2 border-amber-500/40 flex items-center justify-center text-amber-400 font-bold text-2xl bg-cover bg-center shadow-inner">
-            ?
-          </div>
-          <label class="cursor-pointer px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold rounded-lg border border-zinc-700 transition">
-            Upload Avatar Image
-            <input type="file" id="profile-avatar-file" accept="image/*" class="hidden">
-          </label>
-        </div>
-
+      <form id="auth-form" class="space-y-4">
         <div>
-          <label class="block text-xs font-medium text-zinc-300 mb-1">Full Name <span class="text-red-400">*</span></label>
-          <input type="text" id="profile-name" required placeholder="Omar Samir" class="w-full px-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-amber-400 text-white text-xs transition">
+          <label class="block text-xs font-medium text-zinc-400 mb-1">Email</label>
+          <input type="email" id="email" required class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-amber-400 text-white">
         </div>
-
         <div>
-          <label class="block text-xs font-medium text-zinc-300 mb-1">Username <span class="text-red-400">*</span></label>
-          <div class="relative flex items-center">
-            <span class="absolute left-3.5 text-zinc-500 text-xs font-semibold">@</span>
-            <input type="text" id="profile-username" required placeholder="omarsamir" pattern="[a-zA-Z0-9_]+" title="Only letters, numbers, and underscores" class="w-full pl-8 pr-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-amber-400 text-white text-xs transition">
-          </div>
+          <label class="block text-xs font-medium text-zinc-400 mb-1">Password</label>
+          <input type="password" id="password" required class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-amber-400 text-white">
         </div>
-
-        <div>
-          <label class="block text-xs font-medium text-zinc-300 mb-1">Bio (Optional)</label>
-          <textarea id="profile-bio" rows="2" placeholder="Tell your friends a little about yourself..." class="w-full px-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-amber-400 text-white text-xs transition resize-none"></textarea>
-        </div>
-
-        <div class="flex gap-3 pt-2">
-          <!-- زر الرجوع -->
-          <button type="button" id="back-to-auth-btn" class="w-1/3 py-3 px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium rounded-xl text-xs transition">
-            Back
-          </button>
-          <!-- زر الحفظ مع التدرج اللوني والأنيميشن المطلوب -->
-          <button type="submit" id="save-profile-btn" class="w-2/3 py-3 px-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-black hover:to-zinc-900 border border-amber-500/50 text-white font-bold rounded-xl text-xs transition-all duration-500 ease-in-out transform hover:scale-[1.02] shadow-lg">
-            Save & Continue
-          </button>
-        </div>
+        <button type="submit" id="submit-btn" class="w-full py-3.5 bg-zinc-100 text-zinc-950 font-bold rounded-xl hover:bg-white transition">Sign In</button>
       </form>
     </div>
   </div>
 
-  <!-- ================= 3. DASHBOARD SECTION ================= -->
-  <div id="dashboard-container" class="hidden min-h-screen flex flex-col">
-    <header class="border-b border-zinc-800/80 bg-zinc-950/60 backdrop-blur-md sticky top-0 z-40">
-      <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <h1 class="font-serif text-2xl font-bold tracking-wide bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent">
-          bena
-        </h1>
-        
-        <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2">
-            <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-amber-200 flex items-center justify-center text-zinc-950 font-bold text-xs uppercase bg-cover bg-center">
-              U
-            </div>
-            <div class="flex flex-col text-left">
-              <span id="user-display-name" class="text-xs font-semibold text-zinc-200"></span>
-              <span id="user-display-handle" class="text-[10px] text-amber-400/80 font-mono"></span>
-            </div>
-          </div>
-          <button id="logout-btn" type="button" class="text-xs text-zinc-400 hover:text-red-400 transition border border-zinc-800 hover:border-red-900/50 px-3 py-1.5 rounded-lg">
-            Sign Out
-          </button>
-        </div>
-      </div>
+  <!-- Dashboard Container -->
+  <div id="dashboard-container" class="hidden relative z-10 min-h-screen p-8">
+    <header class="max-w-6xl mx-auto flex justify-between items-center mb-10">
+      <h1 class="font-serif text-2xl font-bold text-white">bena</h1>
+      <button id="logout-btn" class="text-xs text-zinc-400 hover:text-red-400">Sign Out</button>
     </header>
-
-    <main class="max-w-6xl mx-auto px-6 py-10 flex-1 w-full">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10 pb-6 border-b border-zinc-800/50">
-        <div>
-          <h2 class="text-2xl font-bold text-white mb-1">Your Spaces</h2>
-          <p class="text-zinc-400 text-xs">Private spaces shared with your close circle.</p>
-        </div>
-        <button id="open-create-modal" type="button" class="px-5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-semibold text-xs rounded-xl shadow-lg transition">
-          + Create New Space
-        </button>
-      </div>
-
-      <div id="spaces-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-
-      <div id="empty-spaces" class="hidden text-center py-20 bg-zinc-900/30 border border-dashed border-zinc-800 rounded-3xl">
-        <div class="w-12 h-12 rounded-full bg-zinc-800/80 text-zinc-400 flex items-center justify-center mx-auto mb-4 text-xl">
-          🌌
-        </div>
-        <h3 class="text-zinc-300 text-base font-semibold mb-1">No spaces yet</h3>
-        <p class="text-zinc-500 text-xs mb-6">Create your first space to invite your inner circle.</p>
-        <button id="empty-create-btn" type="button" class="px-4 py-2 bg-zinc-100 text-zinc-950 text-xs font-semibold rounded-xl hover:bg-white transition">
-          Create Space
-        </button>
-      </div>
+    <main class="max-w-6xl mx-auto">
+      <h2 class="text-2xl font-bold text-white mb-6">Your Spaces</h2>
+      <div id="spaces-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
     </main>
   </div>
 
-  <!-- ================= 4. CREATE SPACE MODAL ================= -->
-  <div id="create-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-6">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-bold text-white">Create Private Space</h3>
-        <button id="close-modal-btn" type="button" class="text-zinc-500 hover:text-white text-lg">✕</button>
-      </div>
-
-      <form id="create-space-form" class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1">Space Name</label>
-          <input type="text" id="space-name" required placeholder="e.g. Cinema Club, High School Circle" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-amber-400 text-white text-sm">
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1">Cover Image URL (Optional)</label>
-          <input type="url" id="space-cover" placeholder="https://images.unsplash.com/..." class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-amber-400 text-white text-sm">
-        </div>
-
-        <div id="modal-error" class="hidden text-xs text-red-400 bg-red-950/40 border border-red-800 p-2.5 rounded-lg"></div>
-
-        <div class="flex items-center justify-end gap-3 pt-2">
-          <button id="cancel-modal-btn" type="button" class="px-4 py-2 text-xs text-zinc-400 hover:text-white">Cancel</button>
-          <button type="submit" id="save-space-btn" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-zinc-950 text-xs font-bold rounded-xl transition">
-            Create Space
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <script>
-    const RAW_URL = 'https://squffpbesprtmzyztzox.supabase.co';
-    const RAW_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxdWZmcGJlc3BydG16eXp0em94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTY4MjUsImV4cCI6MjEwMjQ3MjgyNX0.It6g0pCGoGF3iOGexN2U48LFmgFYSjlbCazLdmmayf8';
+    const SUPABASE_URL = 'https://squffpbesprtmzyztzox.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxdWZmcGJlc3BydG16eXp0em94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTY4MjUsImV4cCI6MjEwMjQ3MjgyNX0.It6g0pCGoGF3iOGexN2U48LFmgFYSjlbCazLdmmayf8';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const SUPABASE_URL = RAW_URL.trim().replace(/\/$/, '');
-    const SUPABASE_ANON_KEY = RAW_KEY.trim();
-
-    const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
-    let isSignUp = false;
-    let currentUser = null;
-    let userProfile = null;
-    let selectedAvatarFile = null;
-
-    // Containers
+    const authForm = document.getElementById('auth-form');
     const authContainer = document.getElementById('auth-container');
-    const profileSetupContainer = document.getElementById('profile-setup-container');
     const dashboardContainer = document.getElementById('dashboard-container');
 
-    // Auth Elements
-    const authForm = document.getElementById('auth-form');
-    const tabLogin = document.getElementById('tab-login');
-    const tabSignUp = document.getElementById('tab-signup');
-    const submitBtn = document.getElementById('submit-btn');
-    const authSubtitle = document.getElementById('auth-subtitle');
-    const nameField = document.getElementById('name-field');
-    const fullNameInput = document.getElementById('full-name');
-    const emailInput = document.getElementById('email');
-    const passInput = document.getElementById('password');
-    const errorMsg = document.getElementById('error-msg');
-    const infoMsg = document.getElementById('info-msg');
-    const infoText = document.getElementById('info-text');
-
-    // Profile Setup Elements
-    const profileForm = document.getElementById('profile-form');
-    const profileNameInput = document.getElementById('profile-name');
-    const profileUsernameInput = document.getElementById('profile-username');
-    const profileBioInput = document.getElementById('profile-bio');
-    const profileAvatarFile = document.getElementById('profile-avatar-file');
-    const avatarPreview = document.getElementById('avatar-preview');
-    const profileError = document.getElementById('profile-error');
-    const saveProfileBtn = document.getElementById('save-profile-btn');
-    const backToAuthBtn = document.getElementById('back-to-auth-btn');
-
-    // Dashboard Elements
-    const logoutBtn = document.getElementById('logout-btn');
-    const userDisplayName = document.getElementById('user-display-name');
-    const userDisplayHandle = document.getElementById('user-display-handle');
-    const userAvatar = document.getElementById('user-avatar');
-    const createModal = document.getElementById('create-modal');
-    const openCreateModal = document.getElementById('open-create-modal');
-    const emptyCreateBtn = document.getElementById('empty-create-btn');
-    const closeModalBtn = document.getElementById('close-modal-btn');
-    const cancelModalBtn = document.getElementById('cancel-modal-btn');
-    const createSpaceForm = document.getElementById('create-space-form');
-    const spaceNameInput = document.getElementById('space-name');
-    const spaceCoverInput = document.getElementById('space-cover');
-    const modalError = document.getElementById('modal-error');
-    const saveSpaceBtn = document.getElementById('save-space-btn');
-    const spacesGrid = document.getElementById('spaces-grid');
-    const emptySpaces = document.getElementById('empty-spaces');
-
-    // Avatar File Preview Listener
-    profileAvatarFile.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        selectedAvatarFile = file;
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          avatarPreview.style.backgroundImage = `url('${event.target.result}')`;
-          avatarPreview.textContent = '';
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    profileNameInput.addEventListener('input', (e) => {
-      if (!selectedAvatarFile && avatarPreview.style.backgroundImage === 'none') {
-        avatarPreview.textContent = e.target.value.charAt(0).toUpperCase() || '?';
-      }
-    });
-
-    // --- Switch Auth Mode ---
-    function setMode(signUpMode) {
-      isSignUp = signUpMode;
-      errorMsg.classList.add('hidden');
-      infoMsg.classList.add('hidden');
-
-      if (isSignUp) {
-        tabSignUp.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow';
-        tabLogin.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all text-zinc-400 hover:text-white';
-        authSubtitle.textContent = 'Create your account and start your space';
-        nameField.classList.remove('hidden');
-        fullNameInput.required = true;
-        submitBtn.className = 'w-full py-3.5 px-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-bold rounded-xl text-sm transition shadow-lg mt-2';
-        submitBtn.textContent = 'Create Account';
-      } else {
-        tabLogin.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all bg-zinc-800 text-white shadow';
-        tabSignUp.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all text-zinc-400 hover:text-white';
-        authSubtitle.textContent = 'Welcome back to your spaces';
-        nameField.classList.add('hidden');
-        fullNameInput.required = false;
-        submitBtn.className = 'w-full py-3.5 px-4 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold rounded-xl text-sm transition shadow-lg mt-2';
-        submitBtn.textContent = 'Sign In';
-      }
-    }
-
-    tabLogin.addEventListener('click', () => setMode(false));
-    tabSignUp.addEventListener('click', () => setMode(true));
-
-    // --- Back to Auth Button ---
-    backToAuthBtn.addEventListener('click', async () => {
-      if (supabaseClient) await supabaseClient.auth.signOut();
-      checkSession();
-    });
-
-    // --- Submit Auth Form ---
     authForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      errorMsg.classList.add('hidden');
-      infoMsg.classList.add('hidden');
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
 
-      if (!supabaseClient || SUPABASE_URL.includes('YOUR_PROJECT_ID')) {
-        showError('Please set your valid Supabase URL & Key first.');
-        return;
-      }
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Processing...';
-
-      const email = emailInput.value.trim();
-      const password = passInput.value;
-      const fullName = fullNameInput.value.trim();
-
-      try {
-        if (isSignUp) {
-          const { data, error } = await supabaseClient.auth.signUp({
-            email,
-            password,
-            options: { data: { name: fullName } }
-          });
-
-          if (error) throw error;
-
-          if (data.user && data.user.identities && data.user.identities.length === 0) {
-            showError('This email is already registered. Try logging in instead.');
-          } else {
-            infoText.textContent = 'Confirmation email sent! Check your inbox.';
-            infoMsg.classList.remove('hidden');
-          }
-        } else {
-          const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-          if (error) {
-            showError('Incorrect email or password. Please try again.');
-          } else {
-            checkSession();
-          }
-        }
-      } catch (err) {
-        showError(err.message || 'An error occurred during authentication.');
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = isSignUp ? 'Create Account' : 'Sign In';
-      }
-    });
-
-    function showError(msg) {
-      errorMsg.textContent = msg;
-      errorMsg.classList.remove('hidden');
-    }
-
-    // --- Mandatory Session Check & Profile Validation ---
-    async function checkSession() {
-      if (!supabaseClient) return;
-      const { data: { session }, error: sessionErr } = await supabaseClient.auth.getSession();
-      
-      if (sessionErr || !session) {
-        await supabaseClient.auth.signOut();
-        currentUser = null;
-        userProfile = null;
-        authContainer.classList.remove('hidden');
-        profileSetupContainer.classList.add('hidden');
-        dashboardContainer.classList.add('hidden');
-        return;
-      }
-
-      currentUser = session.user;
-
-      const { data: profile, error: profileErr } = await supabaseClient
-        .from('profiles')
-        .select('*')
-        .eq('id', currentUser.id)
-        .maybeSingle();
-
-      if (profileErr) {
-        await supabaseClient.auth.signOut();
-        checkSession();
-        return;
-      }
-
-      userProfile = profile;
-
-      if (!userProfile || !userProfile.username || !userProfile.name) {
-        authContainer.classList.add('hidden');
-        dashboardContainer.classList.add('hidden');
-        profileSetupContainer.classList.remove('hidden');
-
-        profileNameInput.value = userProfile?.name || currentUser.user_metadata?.name || '';
-        profileUsernameInput.value = userProfile?.username || '';
-        profileBioInput.value = userProfile?.bio || '';
-        
-        if (userProfile?.avatar_url) {
-          avatarPreview.style.backgroundImage = `url('${userProfile.avatar_url}')`;
-          avatarPreview.textContent = '';
-        } else if (profileNameInput.value) {
-          avatarPreview.textContent = profileNameInput.value.charAt(0).toUpperCase();
-        }
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        document.getElementById('error-msg').textContent = error.message;
+        document.getElementById('error-msg').classList.remove('hidden');
       } else {
-        authContainer.classList.add('hidden');
-        profileSetupContainer.classList.add('hidden');
-        dashboardContainer.classList.remove('hidden');
-
-        userDisplayName.textContent = userProfile.name;
-        userDisplayHandle.textContent = '@' + userProfile.username;
-
-        if (userProfile.avatar_url) {
-          userAvatar.style.backgroundImage = `url('${userProfile.avatar_url}')`;
-          userAvatar.textContent = '';
-        } else {
-          userAvatar.style.backgroundImage = 'none';
-          userAvatar.textContent = userProfile.name.charAt(0).toUpperCase();
-        }
-
-        loadSpaces();
-      }
-    }
-
-    // --- Save Profile Flow (with Image Upload) ---
-    profileForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      profileError.classList.add('hidden');
-      saveProfileBtn.disabled = true;
-      saveProfileBtn.textContent = 'Saving Profile...';
-
-      const name = profileNameInput.value.trim();
-      const username = profileUsernameInput.value.trim().toLowerCase();
-      const bio = profileBioInput.value.trim();
-
-      try {
-        const { data: existingUser } = await supabaseClient
-          .from('profiles')
-          .select('id')
-          .eq('username', username)
-          .neq('id', currentUser.id)
-          .maybeSingle();
-
-        if (existingUser) {
-          throw new Error('Username "@' + username + '" is already taken. Please choose another.');
-        }
-
-        let avatarUrl = userProfile?.avatar_url || null;
-
-        if (selectedAvatarFile) {
-          const fileExt = selectedAvatarFile.name.split('.').pop();
-          const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
-          const filePath = `${fileName}`;
-
-          const { error: uploadErr } = await supabaseClient.storage
-            .from('avatars')
-            .upload(filePath, selectedAvatarFile, { upsert: true });
-
-          if (uploadErr) throw uploadErr;
-
-          const { data: { publicUrl } } = supabaseClient.storage
-            .from('avatars')
-            .getPublicUrl(filePath);
-
-          avatarUrl = publicUrl;
-        }
-
-        const { error: updateErr } = await supabaseClient
-          .from('profiles')
-          .upsert({
-            id: currentUser.id,
-            name,
-            username,
-            bio,
-            avatar_url: avatarUrl
-          });
-
-        if (updateErr) throw updateErr;
-
         checkSession();
-
-      } catch (err) {
-        profileError.textContent = err.message || 'Failed to save profile.';
-        profileError.classList.remove('hidden');
-      } finally {
-        saveProfileBtn.disabled = false;
-        saveProfileBtn.textContent = 'Save & Continue';
       }
     });
 
-    logoutBtn.addEventListener('click', async () => {
-      if (supabaseClient) await supabaseClient.auth.signOut();
-      checkSession();
-    });
-
-    // --- Modal Controls ---
-    const toggleModal = (show) => {
-      modalError.classList.add('hidden');
-      createSpaceForm.reset();
-      if (show) createModal.classList.remove('hidden');
-      else createModal.classList.add('hidden');
-    };
-
-    openCreateModal.addEventListener('click', () => toggleModal(true));
-    emptyCreateBtn.addEventListener('click', () => toggleModal(true));
-    closeModalBtn.addEventListener('click', () => toggleModal(false));
-    cancelModalBtn.addEventListener('click', () => toggleModal(false));
-
-    // --- Load User Spaces ---
-    async function loadSpaces() {
-      spacesGrid.innerHTML = '';
-      emptySpaces.classList.add('hidden');
-
-      try {
-        const { data: memberSpaces, error } = await supabaseClient
-          .from('space_members')
-          .select('role, spaces(id, name, cover_url, created_at)')
-          .eq('user_id', currentUser.id)
-          .eq('status', 'accepted');
-
-        if (error) throw error;
-
-        if (!memberSpaces || memberSpaces.length === 0) {
-          emptySpaces.classList.remove('hidden');
-          return;
-        }
-
-        memberSpaces.forEach(item => {
-          const space = item.spaces;
-          if (!space) return;
-
-          const defaultCover = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80';
-          const coverImage = space.cover_url || defaultCover;
-
-          const card = document.createElement('div');
-          card.className = 'group relative bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 shadow-xl cursor-pointer';
-          card.innerHTML = `
-            <div class="h-32 w-full bg-cover bg-center" style="background-image: url('${coverImage}')">
-              <div class="w-full h-full bg-gradient-to-t from-zinc-900 via-transparent to-transparent"></div>
-            </div>
-            <div class="p-5">
-              <div class="flex items-center justify-between mb-2">
-                <h3 class="text-base font-bold text-white group-hover:text-amber-400 transition">${space.name}</h3>
-                <span class="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-md ${item.role === 'admin' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-zinc-800 text-zinc-400'}">${item.role}</span>
-              </div>
-              <p class="text-xs text-zinc-500">Created ${new Date(space.created_at).toLocaleDateString()}</p>
-            </div>
-          `;
-          spacesGrid.appendChild(card);
-        });
-
-      } catch (err) {
-        console.error('Error loading spaces:', err);
+    async function checkSession() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        authContainer.classList.add('hidden');
+        dashboardContainer.classList.remove('hidden');
+      } else {
+        authContainer.classList.remove('hidden');
+        dashboardContainer.classList.add('hidden');
       }
     }
 
-    // --- Create Space ---
-    createSpaceForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      modalError.classList.add('hidden');
-      saveSpaceBtn.disabled = true;
-      saveSpaceBtn.textContent = 'Creating...';
-
-      const name = spaceNameInput.value.trim();
-      const coverUrl = spaceCoverInput.value.trim() || null;
-
-      try {
-        const { data: spaceData, error: spaceErr } = await supabaseClient
-          .from('spaces')
-          .insert({ name, cover_url: coverUrl, created_by: currentUser.id })
-          .select()
-          .single();
-
-        if (spaceErr) throw spaceErr;
-
-        const { error: memberErr } = await supabaseClient
-          .from('space_members')
-          .insert({
-            space_id: spaceData.id,
-            user_id: currentUser.id,
-            role: 'admin',
-            status: 'accepted'
-          });
-
-        if (memberErr) throw memberErr;
-
-        toggleModal(false);
-        loadSpaces();
-      } catch (err) {
-        modalError.textContent = err.message || 'Failed to create space.';
-        modalError.classList.remove('hidden');
-      } finally {
-        saveSpaceBtn.disabled = false;
-        saveSpaceBtn.textContent = 'Create Space';
-      }
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      checkSession();
     });
 
     checkSession();
