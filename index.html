@@ -19,121 +19,201 @@
     }
   </script>
 </head>
-<body class="bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-zinc-100 min-h-screen font-sans">
+<body class="bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-zinc-100 min-h-screen font-sans flex items-center justify-center p-4">
 
-  <!-- AUTH CONTAINER -->
-  <div id="auth-container" class="min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-zinc-900/80 border border-zinc-800 rounded-2xl p-8 backdrop-blur-md shadow-2xl">
-      <div class="text-center mb-8">
-        <h1 class="font-serif text-4xl font-bold tracking-wide bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent mb-2">
-          bena
-        </h1>
-        <p id="auth-subtitle" class="text-zinc-400 text-sm">Welcome back to your spaces</p>
-      </div>
-
-      <!-- Alert Messages -->
-      <div id="error-msg" class="hidden mb-4 p-3 text-sm bg-red-950/50 border border-red-800 text-red-200 rounded-lg"></div>
-      <div id="info-msg" class="hidden mb-4 p-4 text-sm bg-emerald-950/50 border border-emerald-800 text-emerald-200 rounded-lg text-center space-y-3">
-        <p id="info-text"></p>
-        <a href="https://mail.google.com" target="_blank" class="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium text-xs">Open Gmail</a>
-      </div>
-
-      <form id="auth-form" class="space-y-4">
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1">Email</label>
-          <input type="email" id="email" required placeholder="name@example.com" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-zinc-400 mb-1">Password (Min 6 chars)</label>
-          <input type="password" id="password" required minlength="6" placeholder="••••••••" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm">
-        </div>
-        <button type="submit" id="submit-btn" class="w-full py-3 px-4 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold rounded-xl text-sm transition">
-          Sign In
-        </button>
-      </form>
-
-      <div class="mt-6 text-center">
-        <button id="toggle-auth" type="button" class="text-xs text-zinc-400 hover:text-white">
-          Don't have an account? Sign Up
-        </button>
-      </div>
+  <!-- AUTH CARD -->
+  <div id="auth-container" class="w-full max-w-md bg-zinc-900/80 border border-zinc-800 rounded-3xl p-8 backdrop-blur-md shadow-2xl transition-all duration-300">
+    
+    <!-- TABS TOGGLE -->
+    <div class="flex p-1 bg-zinc-950 border border-zinc-800/80 rounded-xl mb-8">
+      <button id="tab-login" type="button" class="flex-1 py-2 text-xs font-semibold rounded-lg transition-all bg-zinc-800 text-white shadow">
+        Sign In
+      </button>
+      <button id="tab-signup" type="button" class="flex-1 py-2 text-xs font-semibold rounded-lg transition-all text-zinc-400 hover:text-white">
+        Create Account
+      </button>
     </div>
+
+    <!-- HEADER -->
+    <div class="text-center mb-6">
+      <h1 class="font-serif text-4xl font-bold tracking-wide bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent mb-2">
+        bena
+      </h1>
+      <p id="auth-subtitle" class="text-zinc-400 text-xs">Welcome back to your spaces</p>
+    </div>
+
+    <!-- MESSAGES -->
+    <div id="error-msg" class="hidden mb-4 p-3 text-xs bg-red-950/60 border border-red-800 text-red-200 rounded-xl"></div>
+    <div id="info-msg" class="hidden mb-4 p-4 text-xs bg-emerald-950/60 border border-emerald-800 text-emerald-200 rounded-xl text-center space-y-3">
+      <p id="info-text"></p>
+      <a href="https://mail.google.com" target="_blank" class="inline-block px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium text-xs">Open Gmail</a>
+    </div>
+
+    <!-- FORM -->
+    <form id="auth-form" class="space-y-4">
+      <!-- FULL NAME FIELD (SIGN UP ONLY) -->
+      <div id="name-field" class="hidden">
+        <label class="block text-xs font-medium text-amber-200/80 mb-1">Full Name</label>
+        <input type="text" id="full-name" placeholder="Omar Samir" class="w-full px-4 py-3 bg-zinc-950/90 border border-amber-500/30 rounded-xl focus:outline-none focus:border-amber-400 text-white text-sm transition">
+      </div>
+
+      <!-- EMAIL FIELD -->
+      <div>
+        <label id="email-label" class="block text-xs font-medium text-zinc-400 mb-1">Email</label>
+        <input type="email" id="email" required placeholder="name@example.com" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm transition">
+      </div>
+
+      <!-- PASSWORD FIELD -->
+      <div>
+        <label id="pass-label" class="block text-xs font-medium text-zinc-400 mb-1">Password</label>
+        <input type="password" id="password" required minlength="6" placeholder="••••••••" class="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm transition">
+      </div>
+
+      <!-- SUBMIT BUTTON -->
+      <button type="submit" id="submit-btn" class="w-full py-3.5 px-4 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold rounded-xl text-sm transition shadow-lg mt-2">
+        Sign In
+      </button>
+    </form>
   </div>
 
   <!-- MAIN APP CONTAINER -->
-  <div id="app-container" class="hidden p-8 text-center">
-    <h1 class="font-serif text-3xl font-bold mb-4">Welcome to bena!</h1>
-    <p id="user-info" class="text-zinc-400 mb-6"></p>
-    <button id="logout-btn" type="button" class="px-4 py-2 bg-red-950 text-red-200 border border-red-800 rounded-xl hover:bg-red-900 text-sm">
+  <div id="app-container" class="hidden p-8 text-center max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl">
+    <h1 class="font-serif text-3xl font-bold mb-2">Welcome to bena!</h1>
+    <p id="user-greeting" class="text-amber-400 text-lg font-medium mb-1"></p>
+    <p id="user-info" class="text-zinc-500 text-xs mb-6"></p>
+    <button id="logout-btn" type="button" class="px-6 py-2.5 bg-red-950/80 text-red-200 border border-red-800/60 rounded-xl hover:bg-red-900 text-sm transition">
       Sign Out
     </button>
   </div>
 
   <script>
-    // ⚠️ ضع رابط ومفتاح مشروعك هنا
-    const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
-    
-    // إنشاء الاتصال بشكل آمن
+    // ⚠️ استبدل القيم هنا بدقة دون إضافات أو مسافات
+    const RAW_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+    const RAW_KEY = 'YOUR_ANON_KEY';
+
+    // تنظيف الرابط تلقائياً لحل مشكلة Failed to fetch
+    const SUPABASE_URL = RAW_URL.trim().replace(/\/$/, '');
+    const SUPABASE_ANON_KEY = RAW_KEY.trim();
+
     const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
     let isSignUp = false;
 
+    // DOM Elements
     const authContainer = document.getElementById('auth-container');
     const appContainer = document.getElementById('app-container');
     const authForm = document.getElementById('auth-form');
-    const toggleBtn = document.getElementById('toggle-auth');
+    const tabLogin = document.getElementById('tab-login');
+    const tabSignUp = document.getElementById('tab-signup');
     const submitBtn = document.getElementById('submit-btn');
     const authSubtitle = document.getElementById('auth-subtitle');
+    const nameField = document.getElementById('name-field');
+    const fullNameInput = document.getElementById('full-name');
+    const emailInput = document.getElementById('email');
+    const passInput = document.getElementById('password');
+    const emailLabel = document.getElementById('email-label');
+    const passLabel = document.getElementById('pass-label');
     const errorMsg = document.getElementById('error-msg');
     const infoMsg = document.getElementById('info-msg');
     const infoText = document.getElementById('info-text');
+    const userGreeting = document.getElementById('user-greeting');
     const userInfo = document.getElementById('user-info');
     const logoutBtn = document.getElementById('logout-btn');
 
-    // التبديل بين Sign In و Sign Up
-    toggleBtn.addEventListener('click', () => {
-      isSignUp = !isSignUp;
+    // Switch Mode
+    function setMode(signUpMode) {
+      isSignUp = signUpMode;
       errorMsg.classList.add('hidden');
       infoMsg.classList.add('hidden');
-      
-      if (isSignUp) {
-        authSubtitle.textContent = 'Create a private space with your friends';
-        submitBtn.textContent = 'Create Account';
-        toggleBtn.textContent = 'Already have an account? Sign In';
-      } else {
-        authSubtitle.textContent = 'Welcome back to your spaces';
-        submitBtn.textContent = 'Sign In';
-        toggleBtn.textContent = "Don't have an account? Sign Up";
-      }
-    });
 
-    // عند الضغط على الزر الرئيسي
+      if (isSignUp) {
+        // Tab UI
+        tabSignUp.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all bg-amber-500/20 text-amber-300 border border-amber-500/30 shadow';
+        tabLogin.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all text-zinc-400 hover:text-white';
+        
+        // Card Accents
+        authContainer.className = 'w-full max-w-md bg-zinc-900/90 border border-amber-500/20 rounded-3xl p-8 backdrop-blur-md shadow-2xl transition-all duration-300';
+        authSubtitle.textContent = 'Create your profile and start your space';
+        
+        // Fields & Styling
+        nameField.classList.remove('hidden');
+        fullNameInput.required = true;
+        emailLabel.className = 'block text-xs font-medium text-amber-200/80 mb-1';
+        passLabel.className = 'block text-xs font-medium text-amber-200/80 mb-1';
+        emailInput.className = 'w-full px-4 py-3 bg-zinc-950 border border-amber-500/20 rounded-xl focus:outline-none focus:border-amber-400 text-white text-sm transition';
+        passInput.className = 'w-full px-4 py-3 bg-zinc-950 border border-amber-500/20 rounded-xl focus:outline-none focus:border-amber-400 text-white text-sm transition';
+        
+        // Submit Button
+        submitBtn.className = 'w-full py-3.5 px-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-zinc-950 font-bold rounded-xl text-sm transition shadow-lg mt-2';
+        submitBtn.textContent = 'Create Account';
+      } else {
+        // Tab UI
+        tabLogin.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all bg-zinc-800 text-white shadow';
+        tabSignUp.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all text-zinc-400 hover:text-white';
+        
+        // Card Accents
+        authContainer.className = 'w-full max-w-md bg-zinc-900/80 border border-zinc-800 rounded-3xl p-8 backdrop-blur-md shadow-2xl transition-all duration-300';
+        authSubtitle.textContent = 'Welcome back to your spaces';
+        
+        // Fields & Styling
+        nameField.classList.add('hidden');
+        fullNameInput.required = false;
+        emailLabel.className = 'block text-xs font-medium text-zinc-400 mb-1';
+        passLabel.className = 'block text-xs font-medium text-zinc-400 mb-1';
+        emailInput.className = 'w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm transition';
+        passInput.className = 'w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-500 text-white text-sm transition';
+        
+        // Submit Button
+        submitBtn.className = 'w-full py-3.5 px-4 bg-zinc-100 hover:bg-white text-zinc-950 font-semibold rounded-xl text-sm transition shadow-lg mt-2';
+        submitBtn.textContent = 'Sign In';
+      }
+    }
+
+    tabLogin.addEventListener('click', () => setMode(false));
+    tabSignUp.addEventListener('click', () => setMode(true));
+
+    // Submit Auth Form
     authForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorMsg.classList.add('hidden');
       infoMsg.classList.add('hidden');
 
-      if (!supabaseClient) {
-        showError('Supabase is not configured properly.');
+      if (!supabaseClient || SUPABASE_URL.includes('YOUR_PROJECT_ID')) {
+        showError('Please set your valid Supabase URL & Key first.');
         return;
       }
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'Processing...';
 
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      const email = emailInput.value.trim();
+      const password = passInput.value;
+      const fullName = fullNameInput.value.trim();
 
       try {
         if (isSignUp) {
-          const { data, error } = await supabaseClient.auth.signUp({ email, password });
+          const { data, error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+              data: { name: fullName }
+            }
+          });
+
           if (error) throw error;
 
           if (data.user && data.user.identities && data.user.identities.length === 0) {
             showError('This email is already registered. Try logging in instead.');
           } else {
-            infoText.textContent = 'Confirmation email sent! Please check your inbox.';
+            // إضافة البيانات لجدول Profiles
+            if (data.user) {
+              await supabaseClient.from('profiles').upsert({
+                id: data.user.id,
+                name: fullName,
+                username: email.split('@')[0] + Math.floor(Math.random() * 1000)
+              });
+            }
+            infoText.textContent = 'Confirmation email sent! Check your inbox.';
             infoMsg.classList.remove('hidden');
           }
         } else {
@@ -164,7 +244,11 @@
       if (session) {
         authContainer.classList.add('hidden');
         appContainer.classList.remove('hidden');
-        userInfo.textContent = 'Logged in as ID: ' + session.user.id;
+        
+        // جلب اسم المستخدم من Auth metadata أو Profiles
+        const name = session.user.user_metadata?.name || 'User';
+        userGreeting.textContent = 'Hello, ' + name;
+        userInfo.textContent = 'User ID: ' + session.user.id;
       } else {
         authContainer.classList.remove('hidden');
         appContainer.classList.add('hidden');
