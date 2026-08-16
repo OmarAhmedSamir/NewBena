@@ -20,24 +20,15 @@
             'slide-up': 'slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           },
           keyframes: {
-            fadeIn: {
-              '0%': { opacity: '0' },
-              '100%': { opacity: '1' },
-            },
-            slideUp: {
-              '0%': { opacity: '0', transform: 'translateY(20px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' },
-            }
+            fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+            slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
           }
         }
       }
     }
   </script>
   <style>
-    body {
-      background-color: #000000;
-      color: #f5f5f7;
-    }
+    body { background-color: #000000; color: #f5f5f7; }
     .glass-card {
       background: rgba(22, 22, 23, 0.75);
       backdrop-filter: blur(25px);
@@ -65,16 +56,27 @@
   <div id="auth-container" class="relative z-10 min-h-screen flex items-center justify-center p-6 animate-fade-in">
     <div class="w-full max-w-[420px] glass-card rounded-[28px] p-8 md:p-10 shadow-2xl animate-slide-up">
       
-      <!-- Brand Logo -->
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold tracking-tight text-white mb-2 font-sans">
-          Bena
-        </h1>
-        <p class="text-zinc-400 text-xs tracking-wide">Sign in to access your private spaces</p>
+      <!-- Tabs for Sign In & Create Account -->
+      <div class="flex p-1 bg-white/5 border border-white/10 rounded-xl mb-6">
+        <button id="tab-login" type="button" class="flex-1 py-2 text-xs font-semibold rounded-lg transition-all bg-white/10 text-white shadow">
+          Sign In
+        </button>
+        <button id="tab-signup" type="button" class="flex-1 py-2 text-xs font-semibold rounded-lg transition-all text-zinc-400 hover:text-white">
+          Create Account
+        </button>
       </div>
 
-      <!-- Error Message Box -->
+      <!-- Brand Logo -->
+      <div class="text-center mb-6">
+        <h1 class="text-3xl font-bold tracking-tight text-white mb-1 font-sans">
+          Bena
+        </h1>
+        <p id="auth-subtitle" class="text-zinc-400 text-xs tracking-wide">Sign in to access your private spaces</p>
+      </div>
+
+      <!-- Error / Success Messages -->
       <div id="error-msg" class="hidden mb-6 p-3.5 text-xs bg-red-500/10 border border-red-500/20 text-red-300 rounded-xl backdrop-blur-md animate-fade-in"></div>
+      <div id="info-msg" class="hidden mb-6 p-3.5 text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 rounded-xl backdrop-blur-md text-center"></div>
       
       <!-- Auth Form -->
       <form id="auth-form" class="space-y-4">
@@ -116,64 +118,111 @@
   </div>
 
   <script>
-    // Apple-style interactive ambient mouse follower
     const mouseGlow = document.getElementById('mouse-glow');
     window.addEventListener('mousemove', (e) => {
-      const x = e.clientX;
-      const y = e.clientY;
-      mouseGlow.style.background = `radial-gradient(800px circle at ${x}px ${y}px, rgba(120, 119, 198, 0.12), transparent 70%)`;
+      mouseGlow.style.background = `radial-gradient(800px circle at ${e.clientX}px ${e.clientY}px, rgba(120, 119, 198, 0.12), transparent 70%)`;
     });
 
-    // Supabase Configuration
     const SUPABASE_URL = 'https://squffpbesprtmzyztzox.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxdWZmcGJlc3BydG16eXp0em94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTY4MjUsImV4cCI6MjEwMjQ3MjgyNX0.It6g0pCGoGF3iOGexN2U48LFmgFYSjlbCazLdmmayf8';
     
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
 
+    let isSignUp = false;
     const authForm = document.getElementById('auth-form');
     const authContainer = document.getElementById('auth-container');
     const dashboardContainer = document.getElementById('dashboard-container');
     const errorMsg = document.getElementById('error-msg');
+    const infoMsg = document.getElementById('info-msg');
     const submitBtn = document.getElementById('submit-btn');
+    const tabLogin = document.getElementById('tab-login');
+    const tabSignup = document.getElementById('tab-signup');
+    const authSubtitle = document.getElementById('auth-subtitle');
+
+    function setMode(signUpMode) {
+      isSignUp = signUpMode;
+      errorMsg.classList.add('hidden');
+      infoMsg.classList.add('hidden');
+
+      if (isSignUp) {
+        tabSignup.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all bg-white/10 text-white shadow';
+        tabLogin.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all text-zinc-400 hover:text-white';
+        authSubtitle.textContent = 'Create your account to start';
+        submitBtn.textContent = 'Create Account';
+      } else {
+        tabLogin.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all bg-white/10 text-white shadow';
+        tabSignup.className = 'flex-1 py-2 text-xs font-semibold rounded-lg transition-all text-zinc-400 hover:text-white';
+        authSubtitle.textContent = 'Sign in to access your private spaces';
+        submitBtn.textContent = 'Sign In';
+      }
+    }
+
+    tabLogin.addEventListener('click', () => setMode(false));
+    tabSignup.addEventListener('click', () => setMode(true));
 
     authForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorMsg.classList.add('hidden');
-      submitBtn.textContent = 'Signing in...';
-      submitBtn.disabled = true;
-
+      infoMsg.classList.add('hidden');
+      
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (error) {
-        errorMsg.textContent = error.message;
-        errorMsg.classList.remove('hidden');
-        submitBtn.textContent = 'Sign In';
-        submitBtn.disabled = false;
+      submitBtn.disabled = true;
+      submitBtn.textContent = isSignUp ? 'Creating account...' : 'Signing in...';
+
+      if (isSignUp) {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          errorMsg.textContent = error.message;
+          errorMsg.classList.remove('hidden');
+        } else {
+          infoMsg.textContent = 'Account created successfully! You can now sign in.';
+          infoMsg.classList.remove('hidden');
+          setMode(false);
+        }
       } else {
-        checkSession();
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          errorMsg.textContent = error.message;
+          errorMsg.classList.remove('hidden');
+        } else if (data.session) {
+          showDashboard();
+        }
       }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = isSignUp ? 'Create Account' : 'Sign In';
     });
 
-    async function checkSession() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        authContainer.classList.add('hidden');
-        dashboardContainer.classList.remove('hidden');
-      } else {
-        authContainer.classList.remove('hidden');
-        dashboardContainer.classList.add('hidden');
-      }
+    function showDashboard() {
+      authContainer.classList.add('hidden');
+      dashboardContainer.classList.remove('hidden');
     }
+
+    function showAuth() {
+      authContainer.classList.remove('hidden');
+      dashboardContainer.classList.add('hidden');
+    }
+
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        showDashboard();
+      } else {
+        showAuth();
+      }
+    });
 
     document.getElementById('logout-btn').addEventListener('click', async () => {
       await supabase.auth.signOut();
-      checkSession();
+      showAuth();
     });
-
-    checkSession();
   </script>
 </body>
 </html>
