@@ -84,17 +84,15 @@
       <div id="profile-error" class="hidden mb-4 p-3 text-xs bg-red-950/60 border border-red-800 text-red-200 rounded-xl"></div>
 
       <form id="profile-form" class="space-y-4">
-        <!-- Avatar Preview & Input -->
+        <!-- Avatar Preview & File Input -->
         <div class="flex flex-col items-center gap-2 mb-2">
-          <div id="avatar-preview" class="w-20 h-20 rounded-full bg-zinc-800 border-2 border-amber-500/40 flex items-center justify-center text-amber-400 font-bold text-2xl bg-cover bg-center">
+          <div id="avatar-preview" class="w-20 h-20 rounded-full bg-zinc-800 border-2 border-amber-500/40 flex items-center justify-center text-amber-400 font-bold text-2xl bg-cover bg-center shadow-inner">
             ?
           </div>
-          <span class="text-[11px] text-zinc-500">Avatar Preview</span>
-        </div>
-
-        <div>
-          <label class="block text-xs font-medium text-zinc-300 mb-1">Avatar Image URL (Optional)</label>
-          <input type="url" id="profile-avatar-url" placeholder="https://images.unsplash.com/..." class="w-full px-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl focus:outline-none focus:border-amber-400 text-white text-xs transition">
+          <label class="cursor-pointer px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold rounded-lg border border-zinc-700 transition">
+            Upload Avatar Image
+            <input type="file" id="profile-avatar-file" accept="image/*" class="hidden">
+          </label>
         </div>
 
         <div>
@@ -216,6 +214,7 @@
     let isSignUp = false;
     let currentUser = null;
     let userProfile = null;
+    let selectedAvatarFile = null;
 
     // Containers
     const authContainer = document.getElementById('auth-container');
@@ -241,7 +240,7 @@
     const profileNameInput = document.getElementById('profile-name');
     const profileUsernameInput = document.getElementById('profile-username');
     const profileBioInput = document.getElementById('profile-bio');
-    const profileAvatarUrlInput = document.getElementById('profile-avatar-url');
+    const profileAvatarFile = document.getElementById('profile-avatar-file');
     const avatarPreview = document.getElementById('avatar-preview');
     const profileError = document.getElementById('profile-error');
     const saveProfileBtn = document.getElementById('save-profile-btn');
@@ -264,15 +263,23 @@
     const spacesGrid = document.getElementById('spaces-grid');
     const emptySpaces = document.getElementById('empty-spaces');
 
-    // Avatar Preview Listener
-    profileAvatarUrlInput.addEventListener('input', (e) => {
-      const url = e.target.value.trim();
-      if (url) {
-        avatarPreview.style.backgroundImage = `url('${url}')`;
-        avatarPreview.textContent = '';
-      } else {
-        avatarPreview.style.backgroundImage = 'none';
-        avatarPreview.textContent = profileNameInput.value ? profileNameInput.value.charAt(0).toUpperCase() : '?';
+    // Avatar File Preview Listener
+    profileAvatarFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        selectedAvatarFile = file;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          avatarPreview.style.backgroundImage = `url('${event.target.result}')`;
+          avatarPreview.textContent = '';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    profileNameInput.addEventListener('input', (e) => {
+      if (!selectedAvatarFile && avatarPreview.style.backgroundImage === 'none') {
+        avatarPreview.textContent = e.target.value.charAt(0).toUpperCase() || '?';
       }
     });
 
@@ -367,33 +374,30 @@
       if (session) {
         currentUser = session.user;
 
-        // Fetch user profile from DB
         const { data: profile } = await supabaseClient
           .from('profiles')
           .select('*')
           .eq('id', currentUser.id)
-          .single();
+          .maybeSingle();
 
         userProfile = profile;
 
-        // CHECK IF PROFILE IS COMPLETE (Username & Name required)
         if (!userProfile || !userProfile.username || !userProfile.name) {
-          // Show Mandatory Profile Setup Screen
           authContainer.classList.add('hidden');
           dashboardContainer.classList.add('hidden');
           profileSetupContainer.classList.remove('hidden');
 
-          // Pre-fill values if available
           profileNameInput.value = userProfile?.name || currentUser.user_metadata?.name || '';
           profileUsernameInput.value = userProfile?.username || '';
           profileBioInput.value = userProfile?.bio || '';
-          profileAvatarUrlInput.value = userProfile?.avatar_url || '';
           
-          if (profileNameInput.value) {
+          if (userProfile?.avatar_url) {
+            avatarPreview.style.backgroundImage = `url('${userProfile.avatar_url}')`;
+            avatarPreview.textContent = '';
+          } else if (profileNameInput.value) {
             avatarPreview.textContent = profileNameInput.value.charAt(0).toUpperCase();
           }
         } else {
-          // Profile Complete -> Route to Dashboard
           authContainer.classList.add('hidden');
           profileSetupContainer.classList.add('hidden');
           dashboardContainer.classList.remove('hidden');
@@ -420,7 +424,7 @@
       }
     }
 
-    // --- Save Profile Flow ---
+    // --- Save Profile Flow (with Image Upload) ---
     profileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       profileError.classList.add('hidden');
@@ -430,10 +434,8 @@
       const name = profileNameInput.value.trim();
       const username = profileUsernameInput.value.trim().toLowerCase();
       const bio = profileBioInput.value.trim();
-      const avatarUrl = profileAvatarUrlInput.value.trim();
 
       try {
-        // Check if username is taken by another user
         const { data: existingUser } = await supabaseClient
           .from('profiles')
           .select('id')
@@ -445,7 +447,26 @@
           throw new Error('Username "@' + username + '" is already taken. Please choose another.');
         }
 
-        // Upsert Profile Data
+        let avatarUrl = userProfile?.avatar_url || null;
+
+        if (selectedAvatarFile) {
+          const fileExt = selectedAvatarFile.name.split('.').pop();
+          const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
+          const filePath = `${fileName}`;
+
+          const { error: uploadErr } = await supabaseClient.storage
+            .from('avatars')
+            .upload(filePath, selectedAvatarFile, { upsert: true });
+
+          if (uploadErr) throw uploadErr;
+
+          const { data: { publicUrl } } = supabaseClient.storage
+            .from('avatars')
+            .getPublicUrl(filePath);
+
+          avatarUrl = publicUrl;
+        }
+
         const { error: updateErr } = await supabaseClient
           .from('profiles')
           .upsert({
@@ -453,13 +474,11 @@
             name,
             username,
             bio,
-            avatar_url: avatarUrl || null,
-            updated_at: new Date()
+            avatar_url: avatarUrl
           });
 
         if (updateErr) throw updateErr;
 
-        // Refresh session state to enter dashboard
         checkSession();
 
       } catch (err) {
@@ -571,7 +590,7 @@
         loadSpaces();
       } catch (err) {
         modalError.textContent = err.message || 'Failed to create space.';
-        modalError.classList.remove('hidden');
+        modalError.classList.add('hidden');
       } finally {
         saveSpaceBtn.disabled = false;
         saveSpaceBtn.textContent = 'Create Space';
