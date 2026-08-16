@@ -7,12 +7,13 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
-  <script>
-    tailwind.config = { theme: { extend: { fontFamily: { serif: ['Playfair Display', 'serif'] } } } }
-  </script>
+  <style>
+    body { background-color: #09090b; } /* zinc-950 */
+  </style>
 </head>
-<body class="bg-zinc-950 text-zinc-100 min-h-screen font-sans">
+<body class="text-zinc-100 min-h-screen font-sans overflow-x-hidden">
 
+  <!-- Mouse Glow Animation -->
   <div id="mouse-glow" class="pointer-events-none fixed inset-0 z-0 transition-opacity duration-300 opacity-60" style="background: radial-gradient(600px circle at 50% 50%, rgba(245, 158, 11, 0.12), transparent 70%);"></div>
 
   <!-- Auth Container -->
@@ -48,8 +49,16 @@
   </div>
 
   <script>
+    // 1. Mouse Animation
+    const mouseGlow = document.getElementById('mouse-glow');
+    window.addEventListener('mousemove', (e) => {
+      mouseGlow.style.background = `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px, rgba(245, 158, 11, 0.12), transparent 70%)`;
+    });
+
+    // 2. Supabase Setup
+    // هام جداً: ضع هنا مفتاح الـ API Key الصحيح من Supabase (Project Settings > API > anon public)
     const SUPABASE_URL = 'https://squffpbesprtmzyztzox.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxdWZmcGJlc3BydG16eXp0em94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY4OTY4MjUsImV4cCI6MjEwMjQ3MjgyNX0.It6g0pCGoGF3iOGexN2U48LFmgFYSjlbCazLdmmayf8';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_PUBLIC_KEY'; 
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
